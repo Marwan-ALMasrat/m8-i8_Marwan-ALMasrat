@@ -7,11 +7,34 @@ answer with the retrieved context, and evaluate end-to-end on a 30-question set.
 Full assignment instructions are on the **Integration Task page** in
 TalentLMS → Module 8 → Integration Task.
 
-> **TODO (replace this README before submitting):** Rewrite this file to cover
-> the five sections in Task 9 of the guide — Overview, Setup, How to run it,
-> Eval output (paste your `evaluate_rag` result here including the four headline
-> metric keys), and Known limitations. The autograder will not accept this
-> placeholder README.
+## Overview
+
+This RAG service retrieves top-k context from Weaviate using hybrid search, builds a context-injected prompt, and generates an answer using flan-t5-base. Groundedness scoring measures how well the answer is grounded in the retrieved context.
+
+## How to Run
+
+```python
+from rag_service import rag_pipeline
+result = rag_pipeline("How do I squash commits in git?")
+print(result["answer"])
+# result keys: query, answer, contexts, prompt
+```
+
+## Eval Output
+
+```
+answer_keyword_recall_main:   0.0080
+borderline_abstain_rate:      0.8000
+mean_groundedness_main:       0.5800
+mean_groundedness_borderline: 0.7333
+```
+
+## Known Limitations
+
+1. **Low answer_keyword_recall_main (~0.008)**: flan-t5-base over-abstains under the abstention prompt. This is expected per the assignment methodology.
+2. **512-token input ceiling**: flan-t5-base truncates prompts longer than 512 tokens, which can cut off relevant context.
+3. **Groundedness is paraphrase-blind**: the score uses exact token overlap, so a paraphrased answer scores low even if semantically grounded.
+4. **English-only STOPWORDS**: the stopword list covers only English, making groundedness scores unreliable for non-English content.
 
 ## Setup
 
